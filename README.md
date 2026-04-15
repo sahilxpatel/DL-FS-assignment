@@ -112,30 +112,36 @@ File: src/lib/engine/plinko.ts
 All routes are thin and call service layer logic.
 
 ### POST `/api/rounds/commit`
+
 - Creates committed round.
 - Generates `serverSeed`, `nonce`, and `commitHex`.
 - Returns `{ roundId, commitHex, nonce }`.
 
 ### POST `/api/rounds/[id]/start`
+
 - Input: `clientSeed`, `betCents`, `dropColumn`
 - Computes `combinedSeed`, peg map, path, payout.
 - Stores deterministic result in DB.
 - Returns round output including `pegMapHash`.
 
 ### POST `/api/rounds/[id]/reveal`
+
 - Sets status `REVEALED`
 - Returns `serverSeed`.
 
 ### GET `/api/rounds/[id]`
+
 - Returns full round record.
 - `serverSeed` hidden unless round is revealed.
 
 ### GET `/api/verify`
+
 - Query: `serverSeed`, `clientSeed`, `nonce`, `dropColumn`
 - Recomputes deterministic outcome.
 - Returns `commitHex`, `combinedSeed`, `pegMapHash`, `binIndex`, `payoutMultiplier`, `path`.
 
 ### GET `/api/rounds/recent`
+
 - Bonus API for recent rounds list.
 
 ## 6) Frontend UI
@@ -143,6 +149,7 @@ All routes are thin and call service layer logic.
 ### Game page `/`
 
 Includes:
+
 - Div-based responsive board
 - Column selector (0-12)
 - Bet input
@@ -284,12 +291,11 @@ What was manually reviewed/changed after AI drafts:
 
 ## Time Log (Approx)
 
-- Project bootstrap and architecture layout: 1.2h
-- Fairness protocol + deterministic engine + services: 2.2h
-- API + DB wiring + Prisma validation: 1.4h
-- Frontend interactions/animation/responsive polish: 1.6h
+- Project bootstrap and architecture layout: 1h
+- Fairness protocol + deterministic engine + services: 1.4h
+- API + DB wiring + Prisma validation: 1.3h
+- Frontend interactions/animation/responsive polish: 1.4h
 - Verifier UX and replay improvements: 0.8h
-- Testing + vector checks + docs: 1.0h
+- Testing + vector checks + docs: 0.8h
 
-Total focused time: ~8.2h
-
+Total focused time: ~6.7h
