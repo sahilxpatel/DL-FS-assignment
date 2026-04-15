@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Round {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  status           String
+
+  nonce            String
+  commitHex        String
+  serverSeed       String?
+  clientSeed       String
+  combinedSeed     String
+  pegMapHash       String
+
+  rows             Int
+  dropColumn       Int
+  binIndex         Int
+  payoutMultiplier Float
+  betCents         Int
+  pathJson         Json
+
+  revealedAt       DateTime?
+}
