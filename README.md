@@ -1,13 +1,13 @@
-﻿# Plinko Lab (Provably Fair)
+# Plinko Lab (Provably Fair)
 
 Production-ready Plinko implementation using Next.js App Router, TypeScript, Prisma, and PostgreSQL.
 
 ## Submission Links
 
-- GitHub: `ADD_GITHUB_URL_HERE`
-- Live app: `ADD_LIVE_APP_URL_HERE`
-- Verifier page: `ADD_LIVE_APP_URL_HERE/verify`
-- Example round permalink: `ADD_LIVE_APP_URL_HERE/?roundId=ADD_ROUND_ID`
+- GitHub: https://github.com/sahilxpatel/DL-FS-assignment
+- Live app: https://dl-fs-assignment.vercel.app/
+- Verifier page: https://dl-fs-assignment.vercel.app/verify
+- Example round permalink: https://dl-fs-assignment.vercel.app/?roundId=aeooexu5
 
 ## 1) Folder Structure
 
