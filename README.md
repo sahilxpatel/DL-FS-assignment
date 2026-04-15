@@ -287,15 +287,9 @@ What was manually reviewed/changed after AI drafts:
 - Project bootstrap and architecture layout: 1.2h
 - Fairness protocol + deterministic engine + services: 2.2h
 - API + DB wiring + Prisma validation: 1.4h
-- Frontend interactions/animation/responsive polish: 2.1h
+- Frontend interactions/animation/responsive polish: 1.6h
 - Verifier UX and replay improvements: 0.8h
 - Testing + vector checks + docs: 1.0h
 
-Total focused time: ~8.7h
+Total focused time: ~8.2h
 
-## What I Would Do Next
-
-1. Add an integration test suite for API round lifecycle in CI.
-2. Add richer replay timeline with pause/step controls.
-3. Add observability for fairness checks (structured logs + dashboards).
-4. Add configurable paytable editor with audit trail.
