@@ -165,15 +165,21 @@ export default function Home() {
     }
 
     const ctx = audioCtxRef.current;
+    const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = "triangle";
-    osc.frequency.value = goldenBall ? 640 : 520;
-    gain.gain.value = 0.02;
+    osc.frequency.setValueAtTime(goldenBall ? 640 : 520, now);
+    
+    // Smooth ADSR envelope to prevent clicks and guarantee correct application
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.3, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+    
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.09);
+    osc.start(now);
+    osc.stop(now + 0.1);
   }, [animating, soundOn, goldenBall, currentStep, prefersReducedMotion]);
 
   useEffect(() => {
@@ -196,17 +202,20 @@ export default function Home() {
     const notes = [523.25, 659.25, 783.99];
 
     notes.forEach((freq, idx) => {
+      const time = startAt + idx * 0.07;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine";
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.0001, startAt + idx * 0.03);
-      gain.gain.exponentialRampToValueAtTime(0.035, startAt + idx * 0.03 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + idx * 0.03 + 0.2);
+      osc.frequency.setValueAtTime(freq, time);
+      
+      gain.gain.setValueAtTime(0, time);
+      gain.gain.linearRampToValueAtTime(0.4, time + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+      
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.start(startAt + idx * 0.03);
-      osc.stop(startAt + idx * 0.03 + 0.22);
+      osc.start(time);
+      osc.stop(time + 0.22);
     });
   }, [soundOn, prefersReducedMotion, animating, lastRound]);
 
@@ -243,6 +252,16 @@ export default function Home() {
   }, [prefersReducedMotion]);
 
   const dropBall = useCallback(async () => {
+    if (soundOn && typeof window !== "undefined" && !prefersReducedMotion) {
+      if (!audioCtxRef.current) {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) audioCtxRef.current = new AudioCtx();
+      }
+      if (audioCtxRef.current?.state === "suspended") {
+        audioCtxRef.current.resume().catch(() => {});
+      }
+    }
+
     setError(null);
     setReveal(null);
     setConfetti([]);
@@ -343,7 +362,19 @@ export default function Home() {
           <button
             type="button"
             className={`rounded-lg px-4 py-2 ${soundOn ? "gold-btn" : "neon-btn"}`}
-            onClick={() => setSoundOn((prev) => !prev)}
+            onClick={() => {
+              const next = !soundOn;
+              setSoundOn(next);
+              if (next && typeof window !== "undefined" && !prefersReducedMotion) {
+                if (!audioCtxRef.current) {
+                  const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+                  if (AudioCtx) audioCtxRef.current = new AudioCtx();
+                }
+                if (audioCtxRef.current?.state === "suspended") {
+                  audioCtxRef.current.resume().catch(() => {});
+                }
+              }
+            }}
           >
             Sound: {soundOn ? "On" : "Off"}
           </button>

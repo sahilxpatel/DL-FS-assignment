@@ -23,8 +23,6 @@ type Point = {
 const CELL = 30;
 const MARGIN = 20;
 const HEADER_HEIGHT = 46;
-const BALL_OPTICAL_OFFSET_X = 4;
-
 function computePegPoint(row: number, col: number, rows: number): Point {
   const offsetX = (rows - row) * (CELL / 2);
   return {
@@ -104,8 +102,8 @@ export function PlinkoBoard({
         nodes.push(
           <div
             key={`peg-${r}-${c}`}
-            className="absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-slate-100 ring-2 ring-cyan-500/30"
-            style={{ left: p.x, top: p.y }}
+            className="absolute h-2.5 w-2.5 rounded-full bg-slate-100 ring-2 ring-cyan-500/30"
+            style={{ left: p.x, top: p.y, transform: "translate(-50%, -50%)" }}
           />,
         );
       }
@@ -148,8 +146,8 @@ export function PlinkoBoard({
           {Array.from({ length: 13 }).map((_, i) => (
             <div
               key={landingBinIndex === i ? `bin-${i}-${landingPulseKey ?? 0}` : `bin-${i}`}
-              className={`absolute h-8 w-8 -translate-x-1/2 rounded-md border border-cyan-300/25 bg-cyan-400/10 text-center text-[12px] leading-8 text-cyan-100 ${landingBinIndex === i ? (reducedMotion ? "border-amber-200 bg-amber-300/70 text-slate-950 shadow-[0_0_20px_rgba(253,224,71,0.85)]" : "animate-[bin-hit_900ms_ease-out_1] border-cyan-100 bg-cyan-300/40 text-white shadow-[0_0_24px_rgba(34,211,238,0.9)]") : ""}`}
-              style={{ left: MARGIN + i * CELL, top: binsTop }}
+              className={`absolute h-8 w-8 rounded-md border border-cyan-300/25 bg-cyan-400/10 text-center text-[12px] leading-8 text-cyan-100 ${landingBinIndex === i ? (reducedMotion ? "border-amber-200 bg-amber-300/70 text-slate-950 shadow-[0_0_20px_rgba(253,224,71,0.85)]" : "animate-[bin-hit_900ms_ease-out_1] border-cyan-100 bg-cyan-300/40 text-white shadow-[0_0_24px_rgba(34,211,238,0.9)]") : ""}`}
+              style={{ left: MARGIN + i * CELL, top: binsTop, transform: "translateX(-50%)" }}
             >
               {i}
             </div>
@@ -158,9 +156,9 @@ export function PlinkoBoard({
 
         {ballPoint ? (
           <div
-            className={`absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full ring-1 transition-all duration-200 ease-out ${goldenBall ? "bg-amber-300 ring-amber-100/60" : "bg-cyan-300 ring-cyan-100/60"} ${animating && !reducedMotion ? "animate-[pulse-glow_0.8s_ease-in-out_infinite]" : ""}`}
+            className={`absolute h-4 w-4 rounded-full ring-1 transition-all duration-200 ease-out ${goldenBall ? "bg-amber-300 ring-amber-100/60" : "bg-cyan-300 ring-cyan-100/60"} ${animating && !reducedMotion ? "animate-[pulse-glow_0.8s_ease-in-out_infinite]" : ""}`}
             style={{
-              left: ballPoint.x + BALL_OPTICAL_OFFSET_X,
+              left: ballPoint.x,
               top: ballPoint.y,
               transform: "translate(-50%, -50%)",
               boxShadow: goldenBall
