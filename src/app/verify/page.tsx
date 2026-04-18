@@ -58,6 +58,7 @@ export default function VerifyPage() {
   const [nonce, setNonce] = useState("");
   const [dropColumn, setDropColumn] = useState(6);
   const [roundId, setRoundId] = useState("");
+  const [forceMotion, setForceMotion] = useState(false);
 
   const [result, setResult] = useState<VerifyApiResponse | null>(null);
   const [storedRound, setStoredRound] = useState<RoundResponse | null>(null);
@@ -66,6 +67,7 @@ export default function VerifyPage() {
   const [replayStep, setReplayStep] = useState(0);
   const [replaying, setReplaying] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const motionEnabled = !prefersReducedMotion || forceMotion;
   const replayLimit = result ? result.path.length + 1 : 0;
 
   const playReplay = useCallback(() => {
@@ -73,7 +75,7 @@ export default function VerifyPage() {
       return;
     }
 
-    if (prefersReducedMotion) {
+    if (!motionEnabled) {
       setReplayStep(replayLimit);
       setReplaying(false);
       return;
@@ -81,7 +83,7 @@ export default function VerifyPage() {
 
     setReplayStep(0);
     setReplaying(true);
-  }, [result, replayLimit, prefersReducedMotion]);
+  }, [result, replayLimit, motionEnabled]);
 
   useEffect(() => {
     if (!result) {
@@ -275,13 +277,24 @@ export default function VerifyPage() {
                   Path visualization
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={playReplay}
-                className="neon-btn rounded-md px-3 py-1.5 text-xs"
-              >
-                Replay Path
-              </button>
+              <div className="flex items-center gap-2">
+                {prefersReducedMotion ? (
+                  <button
+                    type="button"
+                    onClick={() => setForceMotion((prev) => !prev)}
+                    className={`rounded-md px-3 py-1.5 text-xs ${forceMotion ? "gold-btn" : "neon-btn"}`}
+                  >
+                    Motion: {forceMotion ? "On" : "Reduced"}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={playReplay}
+                  className="neon-btn rounded-md px-3 py-1.5 text-xs"
+                >
+                  Replay Path
+                </button>
+              </div>
             </div>
 
             <div className="mt-4 rounded-xl border border-cyan-300/25 bg-slate-950/45 p-3">
@@ -291,7 +304,7 @@ export default function VerifyPage() {
                 path={result.path}
                 animating={replaying}
                 currentStep={replayStep}
-                reducedMotion={prefersReducedMotion}
+                reducedMotion={!motionEnabled}
                 goldenBall={false}
               />
             </div>

@@ -101,6 +101,7 @@ export default function Home() {
   const [betCents, setBetCents] = useState(100);
   const [clientSeed, setClientSeed] = useState("player-seed");
   const [soundOn, setSoundOn] = useState(true);
+  const [forceMotion, setForceMotion] = useState(false);
   const [goldenBall, setGoldenBall] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -115,6 +116,7 @@ export default function Home() {
   const [landingPulseKey, setLandingPulseKey] = useState(0);
 
   const prefersReducedMotion = usePrefersReducedMotion();
+  const motionEnabled = !prefersReducedMotion || forceMotion;
   const audioCtxRef = useRef<AudioContext | null>(null);
   const lastCelebratedRoundRef = useRef<string | null>(null);
 
@@ -150,13 +152,13 @@ export default function Home() {
 
     const timer = window.setTimeout(() => {
       setConfetti([]);
-    }, prefersReducedMotion ? 700 : 1200);
+    }, motionEnabled ? 1200 : 700);
 
     return () => window.clearTimeout(timer);
-  }, [confetti, prefersReducedMotion]);
+  }, [confetti, motionEnabled]);
 
   useEffect(() => {
-    if (!soundOn || !animating || prefersReducedMotion) {
+    if (!soundOn || !animating || !motionEnabled) {
       return;
     }
 
@@ -180,10 +182,10 @@ export default function Home() {
     gain.connect(ctx.destination);
     osc.start(now);
     osc.stop(now + 0.1);
-  }, [animating, soundOn, goldenBall, currentStep, prefersReducedMotion]);
+  }, [animating, soundOn, goldenBall, currentStep, motionEnabled]);
 
   useEffect(() => {
-    if (!soundOn || prefersReducedMotion || animating || !lastRound) {
+    if (!soundOn || !motionEnabled || animating || !lastRound) {
       return;
     }
 
@@ -217,7 +219,7 @@ export default function Home() {
       osc.start(time);
       osc.stop(time + 0.22);
     });
-  }, [soundOn, prefersReducedMotion, animating, lastRound]);
+  }, [soundOn, motionEnabled, animating, lastRound]);
 
   const payoutCents = useMemo(() => {
     if (!lastRound) {
@@ -227,7 +229,7 @@ export default function Home() {
   }, [lastRound]);
 
   const runAnimation = useCallback(async (pathLen: number) => {
-    if (prefersReducedMotion) {
+    if (!motionEnabled) {
       setAnimating(false);
       setCurrentStep(pathLen);
       return;
@@ -249,10 +251,10 @@ export default function Home() {
     });
 
     setAnimating(false);
-  }, [prefersReducedMotion]);
+  }, [motionEnabled]);
 
   const dropBall = useCallback(async () => {
-    if (soundOn && typeof window !== "undefined" && !prefersReducedMotion) {
+    if (soundOn && typeof window !== "undefined" && motionEnabled) {
       if (!audioCtxRef.current) {
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
         if (AudioCtx) audioCtxRef.current = new AudioCtx();
@@ -289,7 +291,7 @@ export default function Home() {
       setLandingBinIndex(result.binIndex);
       setLandingPulseKey((prev) => prev + 1);
 
-      if (!prefersReducedMotion) {
+      if (motionEnabled) {
         setConfetti(createConfetti());
       }
 
@@ -299,7 +301,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [clientSeed, betCents, dropColumn, runAnimation, refreshRecent, prefersReducedMotion]);
+  }, [clientSeed, betCents, dropColumn, runAnimation, refreshRecent, motionEnabled, soundOn]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -359,13 +361,22 @@ export default function Home() {
           <Link href="/verify" className="neon-btn rounded-lg px-4 py-2">
             Verify Round
           </Link>
+          {prefersReducedMotion ? (
+            <button
+              type="button"
+              className={`rounded-lg px-4 py-2 ${forceMotion ? "gold-btn" : "neon-btn"}`}
+              onClick={() => setForceMotion((prev) => !prev)}
+            >
+              Motion: {forceMotion ? "On" : "Reduced"}
+            </button>
+          ) : null}
           <button
             type="button"
             className={`rounded-lg px-4 py-2 ${soundOn ? "gold-btn" : "neon-btn"}`}
             onClick={() => {
               const next = !soundOn;
               setSoundOn(next);
-              if (next && typeof window !== "undefined" && !prefersReducedMotion) {
+              if (next && typeof window !== "undefined" && motionEnabled) {
                 if (!audioCtxRef.current) {
                   const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
                   if (AudioCtx) audioCtxRef.current = new AudioCtx();
@@ -390,7 +401,7 @@ export default function Home() {
               path={lastRound?.path ?? []}
               animating={animating}
               currentStep={currentStep}
-              reducedMotion={prefersReducedMotion}
+              reducedMotion={!motionEnabled}
               goldenBall={goldenBall}
               landingBinIndex={landingBinIndex}
               landingPulseKey={landingPulseKey}
@@ -410,9 +421,9 @@ export default function Home() {
                   left: `${piece.left}%`,
                   top: `${piece.top}%`,
                   backgroundColor: piece.color,
-                  animation: prefersReducedMotion
-                    ? undefined
-                    : `confetti-fall 900ms ease-out ${piece.delay}s forwards`,
+                  animation: motionEnabled
+                    ? `confetti-fall 900ms ease-out ${piece.delay}s forwards`
+                    : undefined,
                 }}
               />
             ))}
